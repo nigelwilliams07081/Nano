@@ -12,8 +12,6 @@ UXRayComponent::UXRayComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), m_ParticleSystem, GetWorld()->)
-		
 	// ...
 }
 
@@ -22,7 +20,7 @@ UXRayComponent::UXRayComponent()
 void UXRayComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	m_ParticleSystem = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), m_ParticleSystemPrefab, FTransform(m_WorldLocation), false);
 	// ...
 	
 }
@@ -33,6 +31,7 @@ void UXRayComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	//if (FKeyEvent::GetKeyCode == GetKey)
 	// ...
 }
 

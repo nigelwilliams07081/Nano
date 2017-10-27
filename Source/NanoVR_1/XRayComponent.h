@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "XRayComponent.generated.h"
 
 
@@ -25,6 +26,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere)
-		UParticleSystem* m_ParticleSystem;
+		UParticleSystem* m_ParticleSystemPrefab;
+	UPROPERTY(EditAnywhere)
+		FVector m_WorldLocation;
+
+	UParticleSystemComponent* m_ParticleSystem;
 	
 };

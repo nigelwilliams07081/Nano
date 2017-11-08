@@ -32,6 +32,11 @@ public:
 	FVector CrossProduct(FVector& v1, FVector& v2, float angleBetweenVectors);
 	float AngleBetweenVectors(FVector& v1, FVector& v2);
 
+	const int GetNumOfRealLatticeSurfaceNodes();
+	const int GetNumOfReciprocalLatticeSurfaceNodes();
+
+	const TArray<FVector> GetSurfaceNodePoints();
+	const TArray<FVector> GetReciprocalSurfaceNodePoints();
 private:
 
 	UPROPERTY(EditAnywhere, DisplayName = "Lattice Length X")
@@ -65,6 +70,12 @@ private:
 	FVector m_B3ReciprocalLatticeVector;
 
 	FVector m_CrossProductVector;
+
+	TArray<FVector> m_SurfaceNodePoints;
+	TArray<FVector> m_ReciprocalSurfaceNodePoints;
+
+	int m_NumOfSurfaceNodes;
+	int m_NumOfReciprocalSurfaceNodes;
 
 	const int CONVERSION_FACTOR = 100;
 };

@@ -51,11 +51,18 @@ void UReciprocalLatticeComponent::CreateCubicLattice(int& numberOfSpheres, float
 	{
 		for (int j = 0; j < numberOfSpheres; j++)
 		{
+			m_NumOfSurfaceNodes += 1;
 			for (int k = 0; k < numberOfSpheres; k++)
 			{
 				AActor* Sphere = GetWorld()->SpawnActor<AActor>(m_SpherePrefab);
 				Sphere->SetActorLocation(FVector(m_WorldLocation.X + (k * spaceBetweenSpheresX), m_WorldLocation.Y + (j * spaceBetweenSpheresY), m_WorldLocation.Z + (i * spaceBetweenSpheresZ)));
 				Sphere->SetActorScale3D(FVector(sphereSize, sphereSize, sphereSize));
+
+				// If this is the top of the Lattice
+				if (i == numberOfSpheres - 1)
+				{
+					m_SurfaceNodePoints.Add(FVector(Sphere->GetActorLocation()));
+				}
 			}
 		}
 	}
@@ -75,11 +82,18 @@ void UReciprocalLatticeComponent::CreateReciprocalCubicLattice(int& numberOfSphe
 	{
 		for (int j = 0; j < numberOfSpheres; j++)
 		{
+			m_NumOfReciprocalSurfaceNodes += 1;
 			for (int k = 0; k < numberOfSpheres; k++)
 			{
 				AActor* Sphere = GetWorld()->SpawnActor<AActor>(m_ReciprocalSpherePrefab);
 				Sphere->SetActorLocation(FVector(m_ReciprocalWorldLocation.X + (k * spaceBetweenSpheresX), m_ReciprocalWorldLocation.Y + (j * spaceBetweenSpheresY), m_ReciprocalWorldLocation.Z + (i * spaceBetweenSpheresZ)));
 				Sphere->SetActorScale3D(FVector(sphereSize, sphereSize, sphereSize));
+
+				// If this is the top of the Lattice
+				if (i == numberOfSpheres - 1)
+				{
+					m_ReciprocalSurfaceNodePoints.Add(FVector(Sphere->GetActorLocation()));
+				}
 			}
 		}
 	}
@@ -114,4 +128,24 @@ float UReciprocalLatticeComponent::AngleBetweenVectors(FVector& v1, FVector& v2)
 {
 	float dotProduct = FVector::DotProduct(v1, v2);
 	return FMath::Acos(dotProduct / (v1.Size() * v2.Size()));
+}
+
+const int UReciprocalLatticeComponent::GetNumOfRealLatticeSurfaceNodes()
+{
+	return m_NumOfSurfaceNodes;
+}
+
+const int UReciprocalLatticeComponent::GetNumOfReciprocalLatticeSurfaceNodes()
+{
+	return m_NumOfReciprocalSurfaceNodes;
+}
+
+const TArray<FVector> UReciprocalLatticeComponent::GetSurfaceNodePoints()
+{
+	return m_SurfaceNodePoints;
+}
+
+const TArray<FVector> UReciprocalLatticeComponent::GetReciprocalSurfaceNodePoints()
+{
+	return m_ReciprocalSurfaceNodePoints;
 }

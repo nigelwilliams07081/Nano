@@ -2,10 +2,11 @@
 
 #include "ReciprocalLatticeComponent.h"
 #include "ConstructorHelpers.h"
+#include "Engine.h"
 
 
 // Sets default values for this component's properties
-UReciprocalLatticeComponent::UReciprocalLatticeComponent()
+UReciprocalLatticeComponent::UReciprocalLatticeComponent() : m_DistanceBetweenNodes(0.0f)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -16,6 +17,10 @@ UReciprocalLatticeComponent::UReciprocalLatticeComponent()
 
 	static ConstructorHelpers::FObjectFinder<UBlueprint> ReciprocalLatticeSphereBlueprintObject(TEXT("Blueprint'/Game/BluePrints/ReciprocalLatticeSphere.ReciprocalLatticeSphere'"));
 	m_ReciprocalSpherePrefab = (UClass*)ReciprocalLatticeSphereBlueprintObject.Object->GeneratedClass;
+
+	static ConstructorHelpers::FObjectFinder<UBlueprint> LatticePlaneBlueprintObject(TEXT("Blueprint'/Game/Blueprints/LatticePlane.LatticePlane'"));
+	m_PlanePrefab = (UClass*)LatticePlaneBlueprintObject.Object->GeneratedClass;
+
 	// ...
 }
 
@@ -43,31 +48,30 @@ void UReciprocalLatticeComponent::TickComponent(float DeltaTime, ELevelTick Tick
 
 void UReciprocalLatticeComponent::CreateCubicLattice(int& numberOfSpheres, float& lengthX, float& lengthY, float& lengthZ, float& sphereSize)
 {
-	float spaceBetweenSpheresX = (m_LatticeLengthX * CONVERSION_FACTOR) / (numberOfSpheres - 1);
-	float spaceBetweenSpheresY = (m_LatticeLengthY * CONVERSION_FACTOR) / (numberOfSpheres - 1);
-	float spaceBetweenSpheresZ = (m_LatticeLengthZ * CONVERSION_FACTOR) / (numberOfSpheres - 1);
+	float spaceBetweenSpheresX = (lengthX * CONVERSION_FACTOR) / (numberOfSpheres - 1);
+	float spaceBetweenSpheresY = (lengthY * CONVERSION_FACTOR) / (numberOfSpheres - 1);
+	float spaceBetweenSpheresZ = (lengthZ * CONVERSION_FACTOR) / (numberOfSpheres - 1);
+	m_DistanceBetweenNodes = spaceBetweenSpheresZ;
 
 	for (int i = 0; i < numberOfSpheres; i++)
 	{
 		for (int j = 0; j < numberOfSpheres; j++)
 		{
-			m_NumOfSurfaceNodes += 1;
 			for (int k = 0; k < numberOfSpheres; k++)
 			{
 				AActor* Sphere = GetWorld()->SpawnActor<AActor>(m_SpherePrefab);
 				Sphere->SetActorLocation(FVector(m_WorldLocation.X + (k * spaceBetweenSpheresX), m_WorldLocation.Y + (j * spaceBetweenSpheresY), m_WorldLocation.Z + (i * spaceBetweenSpheresZ)));
 				Sphere->SetActorScale3D(FVector(sphereSize, sphereSize, sphereSize));
 
-				// If this is the top of the Lattice
-				if (i == numberOfSpheres - 1)
+				if (k == numberOfSpheres - 1)
 				{
-					m_SurfaceNodePoints.Add(FVector(Sphere->GetActorLocation()));
+					CreatePlane(FVector(m_WorldLocation.X + (lengthX * CONVERSION_FACTOR / 2.0f), m_WorldLocation.Y + (lengthY * CONVERSION_FACTOR / 2.0f), m_WorldLocation.Z + (i * spaceBetweenSpheresZ + sphereSize * CONVERSION_FACTOR * 0.5f)), lengthX, lengthY);
 				}
 			}
 		}
 	}
 
-	SetLatticeVectors(m_LatticeLengthX, m_LatticeLengthY, m_LatticeLengthZ);
+	SetLatticeVectors(lengthX, lengthY, lengthZ);
 }
 
 void UReciprocalLatticeComponent::CreateReciprocalCubicLattice(int& numberOfSpheres, FVector& b1, FVector& b2, FVector& b3, float& sphereSize)
@@ -82,18 +86,11 @@ void UReciprocalLatticeComponent::CreateReciprocalCubicLattice(int& numberOfSphe
 	{
 		for (int j = 0; j < numberOfSpheres; j++)
 		{
-			m_NumOfReciprocalSurfaceNodes += 1;
 			for (int k = 0; k < numberOfSpheres; k++)
 			{
 				AActor* Sphere = GetWorld()->SpawnActor<AActor>(m_ReciprocalSpherePrefab);
 				Sphere->SetActorLocation(FVector(m_ReciprocalWorldLocation.X + (k * spaceBetweenSpheresX), m_ReciprocalWorldLocation.Y + (j * spaceBetweenSpheresY), m_ReciprocalWorldLocation.Z + (i * spaceBetweenSpheresZ)));
 				Sphere->SetActorScale3D(FVector(sphereSize, sphereSize, sphereSize));
-
-				// If this is the top of the Lattice
-				if (i == numberOfSpheres - 1)
-				{
-					m_ReciprocalSurfaceNodePoints.Add(FVector(Sphere->GetActorLocation()));
-				}
 			}
 		}
 	}
@@ -118,6 +115,13 @@ void UReciprocalLatticeComponent::SetReciprocalLatticeVectors(FVector& a1, FVect
 	m_B3ReciprocalLatticeVector = (m_CrossProductVector / (a3 * m_CrossProductVector));
 }
 
+void UReciprocalLatticeComponent::CreatePlane(FVector location, float & lengthX, float & lengthY)
+{
+	AActor* Plane = GetWorld()->SpawnActor(m_PlanePrefab);
+	Plane->SetActorLocation(location);
+	Plane->SetActorScale3D(FVector(lengthX, lengthY, 1.0f));
+}
+
 FVector UReciprocalLatticeComponent::CrossProduct(FVector& v1, FVector& v2, float angleBetweenVectors)
 {
 	return v1 * v2 * FMath::Asin(angleBetweenVectors);
@@ -130,22 +134,8 @@ float UReciprocalLatticeComponent::AngleBetweenVectors(FVector& v1, FVector& v2)
 	return FMath::Acos(dotProduct / (v1.Size() * v2.Size()));
 }
 
-const int UReciprocalLatticeComponent::GetNumOfRealLatticeSurfaceNodes()
+float UReciprocalLatticeComponent::GetDistanceBetweenNodes() const
 {
-	return m_NumOfSurfaceNodes;
+	return m_DistanceBetweenNodes;
 }
 
-const int UReciprocalLatticeComponent::GetNumOfReciprocalLatticeSurfaceNodes()
-{
-	return m_NumOfReciprocalSurfaceNodes;
-}
-
-const TArray<FVector> UReciprocalLatticeComponent::GetSurfaceNodePoints()
-{
-	return m_SurfaceNodePoints;
-}
-
-const TArray<FVector> UReciprocalLatticeComponent::GetReciprocalSurfaceNodePoints()
-{
-	return m_ReciprocalSurfaceNodePoints;
-}

@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "ReciprocalLatticeComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "ReciprocalLatticeComponent.h"
 #include "XRayComponent.generated.h"
 
 
@@ -21,27 +21,52 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	void RotateVertical(float rotationAmount);
-	void AddDebugTextToScreen(FString text);
+	void MoveRadially(float movementSpeed);
+	void ChangeParticleSystemRotation(float rotationAmount);
+	void AddDebugTextToScreen(FString text, float duration);
+	void FindAngleBetweenLocations(FVector& currentLocation, FVector& lastLocation);
+	void FindTotalAngleFromOrigin(FVector& currentLocation);
+	float GetAngleBetweenVectors(FVector& v1, FVector& v2);
+	void ManageInputs(float& deltaTime);
+	void ManageBraggTheorem(float theta);
+
+	UFUNCTION()
+	void DestroyParticle();
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	//UParticleSystemComponent* GetParticleSystem() const;
 private:
 	UPROPERTY(EditAnywhere)
 		UParticleSystem* m_ParticleSystemPrefab;
 	UPROPERTY(EditAnywhere)
-		FVector m_WorldLocation;
+		FVector m_LocationOrigin;
+	UPROPERTY(EditAnywhere)
+		float m_DistanceFromLattice;
 	UPROPERTY(EditAnywhere)
 		float m_VerticalRotationSpeed;
+	UPROPERTY(EditAnywhere)
+		float m_AngleAdjustmentConstant;
+	UPROPERTY(EditAnywhere, Meta = (DisplayName = "Wavelength (in nanometers)", ClampMin = 0.01, ClampMax = 10.0))
+		float m_Wavelength;
 
-	//UReciprocalLatticeComponent* m_Lattice;
-	//UParticleSystemComponent* m_ParticleSystem;
-	TArray<UParticleSystemComponent*> m_ParticleSystemList;
+	UParticleSystemComponent* m_ParticleSystem;
+	//TArray<UParticleSystemComponent*> m_ParticleSystemList;
 	APlayerController* m_PlayerController;
 
-	FVector m_ParticleSystemVelocity;
+	float m_Velocity;
+	float m_Rotation;
 	bool m_IsParticleSystemActive = true;
-	
+	float m_OriginalAngle;
+	float m_ChangeInAngle;
+	float m_Angle;
+
+	FVector m_OriginalActorVector;
+
+	FVector m_OriginalActorLocation;
+	FVector m_LastLocation;
+	FVector m_CurrentLocation;
+	UReciprocalLatticeComponent* m_ReciprocalLattice;
+
+	bool m_LatticeHasInitialized;
 };

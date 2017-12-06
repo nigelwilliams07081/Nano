@@ -29,14 +29,13 @@ public:
 	void SetLatticeVectors(float& lengthX, float& lengthY, float& lengthZ);
 	void SetReciprocalLatticeVectors(FVector& a1, FVector& a2, FVector& a3);
 
+	void CreatePlane(FVector location, float& lengthX, float& lengthY);
+
 	FVector CrossProduct(FVector& v1, FVector& v2, float angleBetweenVectors);
 	float AngleBetweenVectors(FVector& v1, FVector& v2);
 
-	const int GetNumOfRealLatticeSurfaceNodes();
-	const int GetNumOfReciprocalLatticeSurfaceNodes();
+	float GetDistanceBetweenNodes() const;
 
-	const TArray<FVector> GetSurfaceNodePoints();
-	const TArray<FVector> GetReciprocalSurfaceNodePoints();
 private:
 
 	UPROPERTY(EditAnywhere, DisplayName = "Lattice Length X")
@@ -61,6 +60,8 @@ private:
 
 	UClass* m_SpherePrefab;
 	UClass* m_ReciprocalSpherePrefab;
+	UClass* m_PlanePrefab;
+	//UClass* m_ReciprocalPlanePrefab;
 
 	FVector m_A1LatticeVector;
 	FVector m_A2LatticeVector;
@@ -71,11 +72,7 @@ private:
 
 	FVector m_CrossProductVector;
 
-	TArray<FVector> m_SurfaceNodePoints;
-	TArray<FVector> m_ReciprocalSurfaceNodePoints;
-
-	int m_NumOfSurfaceNodes;
-	int m_NumOfReciprocalSurfaceNodes;
+	float m_DistanceBetweenNodes;
 
 	const int CONVERSION_FACTOR = 100;
 };

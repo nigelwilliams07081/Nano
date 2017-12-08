@@ -25,22 +25,10 @@ void UXRayComponent::BeginPlay()
 	GetOwner()->SetActorRotation(FQuat(FRotator(0.0f, 0.0f, 0.0f)));
 	m_ParticleSystem = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), m_ParticleSystemPrefab, FTransform(GetOwner()->GetActorLocation()), false);
 	m_ParticleSystem->SetWorldScale3D(FVector(m_Wavelength, m_Wavelength, m_Wavelength));
+
+	m_ParticleSystem->SetFloatParameter("MaxCollisions", 1.0f);
 	// TODO: Allow Particle System to only have 1 Max Collision
-
-	FScriptDelegate Delegate;
-	Delegate.BindUFunction(this, "DestroyParticle");
-	m_ParticleSystem->OnParticleCollide.AddUnique(Delegate);
-
-	if (m_ParticleSystem->OnParticleCollide.Contains(Delegate))
-	{
-		AddDebugTextToScreen("Has DestroyParticle method", 1.5f);
-		m_ParticleSystem->OnParticleCollide.Remove(Delegate);
-
-		if (!m_ParticleSystem->OnParticleCollide.Contains(Delegate))
-		{
-			AddDebugTextToScreen("DestroyParticle method Destroyed", 1.5f);
-		}
-	}
+	AddDebugTextToScreen((m_ParticleSystem->GetCollisionEnabled() ? "Collision is Enabled" : "Collision is Not Enabled"), 1.5f);
 
 	m_PlayerController = GetWorld()->GetFirstPlayerController();
 	m_Velocity = 0.0f;
@@ -56,7 +44,6 @@ void UXRayComponent::BeginPlay()
 
 	m_OriginalActorVector = FVector(m_OriginalActorLocation - m_LocationOrigin);
 	// ...
-	
 }
 
 void UXRayComponent::MoveRadially(float movementSpeed)
@@ -118,16 +105,20 @@ void UXRayComponent::ManageInputs(float & deltaTime)
 	}
 	else if (m_PlayerController->IsInputKeyDown(EKeys::L))
 	{
-		if (m_ParticleSystem->RelativeScale3D.Size() < 7.0f)
+		if (m_Wavelength < 7.0f)
 		{
-			m_ParticleSystem->SetRelativeScale3D(FVector(m_ParticleSystem->RelativeScale3D.X + deltaTime, m_ParticleSystem->RelativeScale3D.Y + deltaTime, m_ParticleSystem->RelativeScale3D.Z + deltaTime));
+			m_Wavelength += deltaTime;
+			m_Wavelength += deltaTime;
+			m_Wavelength += deltaTime;
 		}
 	}
 	else if (m_PlayerController->IsInputKeyDown(EKeys::J))
 	{
-		if (m_ParticleSystem->RelativeScale3D.Size() > 1.0f)
+		if (m_Wavelength > 1.0f)
 		{
-			m_ParticleSystem->SetRelativeScale3D(FVector(m_ParticleSystem->RelativeScale3D.X - deltaTime, m_ParticleSystem->RelativeScale3D.Y - deltaTime, m_ParticleSystem->RelativeScale3D.Z - deltaTime));
+			m_Wavelength -= deltaTime;
+			m_Wavelength -= deltaTime;
+			m_Wavelength -= deltaTime;
 		}
 	}
 }
@@ -135,14 +126,19 @@ void UXRayComponent::ManageInputs(float & deltaTime)
 void UXRayComponent::ManageBraggTheorem(float theta)
 {
 	float Two_D_Sin_Theta = (round(2.0f * m_ReciprocalLattice->GetDistanceBetweenNodes() * FMath::Sin(theta) * 10.0f) / 10.0f);
+	AddDebugTextToScreen(m_Wavelength == Two_D_Sin_Theta ?
+		FString::SanitizeFloat(m_Wavelength) + " = " + FString::SanitizeFloat(Two_D_Sin_Theta) + "!!" :
+		FString::SanitizeFloat(m_Wavelength) + " != " + FString::SanitizeFloat(Two_D_Sin_Theta) + "...", 1.0f);
+
 	if (m_Wavelength == Two_D_Sin_Theta)
 	{
 		// Allow 2 Max Collisions
-		AddDebugTextToScreen(FString("Appear!!" + FString::SanitizeFloat(2.0f * m_ReciprocalLattice->GetDistanceBetweenNodes() * FMath::Sin(theta))), 1.5f);
+		m_ParticleSystem->SetFloatParameter("MaxCollisions", 2.0f);
 	}
 	else
 	{
 		// Allow 1 Max Collision
+		m_ParticleSystem->SetFloatParameter("MaxCollisions", 1.0f);
 	}
 	
 }
@@ -170,6 +166,7 @@ void UXRayComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	ManageInputs(DeltaTime);
 	ManageBraggTheorem(FMath::Abs(m_Angle));
 	
+	m_ParticleSystem->SetWorldScale3D(FVector(m_Wavelength, m_Wavelength, m_Wavelength));
 	m_ParticleSystem->SetWorldRotation(FQuat(GetOwner()->GetActorRotation()));
 	m_ParticleSystem->SetWorldLocation(GetOwner()->GetActorLocation());
 	// ...

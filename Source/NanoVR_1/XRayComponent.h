@@ -21,6 +21,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	void InitializeXRayComponents();
 	void MoveRadially(float movementSpeed);
 	void ChangeParticleSystemRotation(float rotationAmount);
 	void AddDebugTextToScreen(FString text, float duration);
@@ -40,13 +41,9 @@ private:
 	UPROPERTY(EditAnywhere)
 		UParticleSystem* m_ParticleSystemPrefab;
 	UPROPERTY(EditAnywhere)
-		FVector m_LocationOrigin;
-	UPROPERTY(EditAnywhere)
 		float m_DistanceFromLattice;
 	UPROPERTY(EditAnywhere)
 		float m_VerticalRotationSpeed;
-	UPROPERTY(EditAnywhere)
-		float m_AngleAdjustmentConstant;
 	UPROPERTY(EditAnywhere, Meta = (DisplayName = "Wavelength (in nanometers)", ClampMin = 0.01, ClampMax = 10.0))
 		float m_Wavelength;
 
@@ -61,12 +58,17 @@ private:
 	float m_ChangeInAngle;
 	float m_Angle;
 
+	FVector m_LocationOrigin;
+
 	FVector m_OriginalActorVector;
 
 	FVector m_OriginalActorLocation;
 	FVector m_LastLocation;
 	FVector m_CurrentLocation;
 	UReciprocalLatticeComponent* m_ReciprocalLattice;
+
+	float m_TwoDSinTheta_Rounded;
+	float m_Wavelength_Rounded;
 
 	bool m_LatticeHasInitialized;
 };

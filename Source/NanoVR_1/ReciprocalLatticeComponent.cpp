@@ -6,7 +6,7 @@
 
 
 // Sets default values for this component's properties
-UReciprocalLatticeComponent::UReciprocalLatticeComponent() : m_DistanceBetweenNodes(0.0f)
+UReciprocalLatticeComponent::UReciprocalLatticeComponent() : m_DistanceBetweenNodesZ(0.0f)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -51,7 +51,8 @@ void UReciprocalLatticeComponent::CreateCubicLattice(int& numberOfSpheres, float
 	float spaceBetweenSpheresX = (lengthX * CONVERSION_FACTOR) / (numberOfSpheres - 1);
 	float spaceBetweenSpheresY = (lengthY * CONVERSION_FACTOR) / (numberOfSpheres - 1);
 	float spaceBetweenSpheresZ = (lengthZ * CONVERSION_FACTOR) / (numberOfSpheres - 1);
-	m_DistanceBetweenNodes = spaceBetweenSpheresZ;
+	m_DistanceBetweenNodesZ = spaceBetweenSpheresZ;
+	m_NumberOfNodesZ = numberOfSpheres;
 
 	for (int i = 0; i < numberOfSpheres; i++)
 	{
@@ -134,8 +135,18 @@ float UReciprocalLatticeComponent::AngleBetweenVectors(FVector& v1, FVector& v2)
 	return FMath::Acos(dotProduct / (v1.Size() * v2.Size()));
 }
 
-float UReciprocalLatticeComponent::GetDistanceBetweenNodes() const
+float UReciprocalLatticeComponent::GetDistanceBetweenNodesZ() const
 {
-	return m_DistanceBetweenNodes;
+	return m_DistanceBetweenNodesZ;
+}
+
+int UReciprocalLatticeComponent::GetNumberOfNodesZ() const
+{
+	return m_NumberOfNodesZ;
+}
+
+FVector UReciprocalLatticeComponent::GetWorldLocation() const
+{
+	return m_WorldLocation;
 }
 

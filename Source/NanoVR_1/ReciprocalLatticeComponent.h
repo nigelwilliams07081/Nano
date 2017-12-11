@@ -34,7 +34,10 @@ public:
 	FVector CrossProduct(FVector& v1, FVector& v2, float angleBetweenVectors);
 	float AngleBetweenVectors(FVector& v1, FVector& v2);
 
-	float GetDistanceBetweenNodes() const;
+	float GetDistanceBetweenNodesZ() const;
+	int GetNumberOfNodesZ() const;
+
+	FVector GetWorldLocation() const;
 
 private:
 
@@ -72,7 +75,8 @@ private:
 
 	FVector m_CrossProductVector;
 
-	float m_DistanceBetweenNodes;
+	float m_DistanceBetweenNodesZ;
+	int m_NumberOfNodesZ;
 
 	const int CONVERSION_FACTOR = 100;
 };

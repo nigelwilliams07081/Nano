@@ -20,10 +20,6 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	void CreateCubicLattice(int& numberOfSpheres, float& lengthX, float& lengthY, float& lengthZ, float& sphereSize);
 	void CreateReciprocalCubicLattice(int& numberOfSpheres, FVector& b1, FVector& b2, FVector& b3, float& sphereSize);
 	void SetLatticeVectors(float& lengthX, float& lengthY, float& lengthZ);
@@ -31,13 +27,66 @@ public:
 
 	void CreatePlane(FVector location, float& lengthX, float& lengthY);
 
+public:	
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	/**
+	Returns: FVector
+	Returns the Cross product of @v1 and @v2, utilizing the @angleBetweenVectors
+	@param v1 (FVector)
+	@param v2 (FVector)
+	*/
 	FVector CrossProduct(FVector& v1, FVector& v2, float angleBetweenVectors);
+
+	/**
+	Returns: float
+	Returns the angle between @v1 and @v2 using FVector::DotProduct() and FMath::Acos()
+	@param v1 (FVector)
+	@param v2 (FVector)
+	*/
 	float AngleBetweenVectors(FVector& v1, FVector& v2);
 
+	/**
+	Returns: float
+	Returns m_DistanceBetweenNodesZ
+	*/
 	float GetDistanceBetweenNodesZ() const;
+
+	/**
+	Returns: int
+	Returns m_NumberOfNodesZ
+	*/
 	int GetNumberOfNodesZ() const;
 
+	/**
+	Returns: float
+	Returns m_DistanceBetweenReciprocalNodesZ
+	*/
+	float GetDistanceBetweenReciprocalNodesZ() const;
+
+	/**
+	Returns: int
+	Returns m_NumberOfReciprocalNodesZ
+	*/
+	int GetNumberOfReciprocalNodesZ() const;
+
+	/**
+	Returns: FVector
+	Returns the current World Location of the Real-space Lattice
+	*/
 	FVector GetWorldLocation() const;
+
+	/**
+	Returns: FVector
+	Returns the current World Location of the Reciprocal-space Lattice
+	*/
+	FVector GetReciprocalWorldLocation() const;
+
+	/**
+	The vector used to represent the top surface of the real-space and reciprocal-space lattices
+	*/
+	FVector ParallelOriginVector;
 
 private:
 
@@ -61,10 +110,14 @@ private:
 	UPROPERTY(EditAnywhere, DisplayName = "Reciprocal World Location (Testing)")
 		FVector m_ReciprocalWorldLocation;
 
+	// The prefab to be used for spawning a real-space sphere
 	UClass* m_SpherePrefab;
+	// The prefab to be used for spawning a reciprocal-space sphere
 	UClass* m_ReciprocalSpherePrefab;
+	// The prefab to be used for spawning a real-space plane
 	UClass* m_PlanePrefab;
-	//UClass* m_ReciprocalPlanePrefab;
+	// The prefab to be used for spawning a reciprocal-space plane
+	UClass* m_ReciprocalPlanePrefab;
 
 	FVector m_A1LatticeVector;
 	FVector m_A2LatticeVector;
@@ -75,8 +128,16 @@ private:
 
 	FVector m_CrossProductVector;
 
+	// Used to hold the distance between the nodes in the Z (up) direction
 	float m_DistanceBetweenNodesZ;
+	// Used to hold the number of nodes in the Z (up) direction
 	int m_NumberOfNodesZ;
 
+	// Used to hold the distance betwen the reciprocal nodes in the Z direction
+	float m_DistanceBetweenReciprocalNodesZ;
+	// Used to hold the number of nodes in the Z direction
+	int m_NumberOfReciprocalNodesZ;
+
+	// The conversion-factor used to translate the units from centimeters (default) to meters in the World
 	const int CONVERSION_FACTOR = 100;
 };

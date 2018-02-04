@@ -10,7 +10,7 @@ UXRayComponent::UXRayComponent() : m_IsXRayComponentInitialized(false)
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	
+
 	// ...
 }
 
@@ -19,13 +19,13 @@ UXRayComponent::UXRayComponent() : m_IsXRayComponentInitialized(false)
 void UXRayComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// ...
 }
 
 void UXRayComponent::InitializeXRayComponents()
 {
-	/* 
+	/*
 	Searches through all the UActorComponent objects in the World and returns the first one
 	of the UReciprocalLatticeComponent type
 	*/
@@ -34,7 +34,14 @@ void UXRayComponent::InitializeXRayComponents()
 		m_ReciprocalLattice = *ObjectItr;
 	}
 
-	m_LocationOrigin = m_ReciprocalLattice->GetWorldLocation();
+	if (!m_IsReciprocalBeam)
+	{
+		m_LocationOrigin = m_ReciprocalLattice->GetWorldLocation();
+	}
+	else
+	{
+		m_LocationOrigin = m_ReciprocalLattice->GetReciprocalWorldLocation();
+	}
 
 	// Sets the Z (up) component of the m_LocationOrigin to be the top of the Real-space lattice
 	m_LocationOrigin.Z += m_ReciprocalLattice->GetDistanceBetweenNodesZ() * (m_ReciprocalLattice->GetNumberOfNodesZ() - 1);
@@ -152,7 +159,7 @@ float UXRayComponent::GetAngleBetweenVectors(FVector & v1, FVector & v2)
 
 /**
 Returns: FVector
-Returns the resulting vector from sutracting @head - @tail
+Returns the resulting vector from subtracting @head - @tail
 @param head (FVector)
 @param tail (FVector)
 */
@@ -312,12 +319,12 @@ void UXRayComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 			// Sets the 3D size of the m_ParticleSystem
 			m_ParticleSystem->SetWorldScale3D(FVector(m_Wavelength, m_Wavelength, m_Wavelength));
-			// 
+			//
 			m_ParticleSystem->SetWorldRotation(FQuat(GetOwner()->GetActorRotation()));
 			m_ParticleSystem->SetWorldLocation(GetOwner()->GetActorLocation());
 		}
 	}
-	
+
 	// ...
 }
 

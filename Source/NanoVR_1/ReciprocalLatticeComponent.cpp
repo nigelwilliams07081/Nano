@@ -22,7 +22,7 @@ UReciprocalLatticeComponent::UReciprocalLatticeComponent() : m_DistanceBetweenNo
 
 	// Holds the Blueprint Object made in the Editor
 	static ConstructorHelpers::FObjectFinder<UClass> ReciprocalLatticeSphereBlueprintObject(TEXT("Class'/Game/BluePrints/ReciprocalLatticeSphere.ReciprocalLatticeSphere_C'"));
-	
+
 	// if the Blueprint Object is not nullptr, Instantiate it, otherwise Print an Error Message
 	ReciprocalLatticeSphereBlueprintObject.Object ?
 		m_ReciprocalSpherePrefab = (UClass*)ReciprocalLatticeSphereBlueprintObject.Object :
@@ -30,7 +30,7 @@ UReciprocalLatticeComponent::UReciprocalLatticeComponent() : m_DistanceBetweenNo
 
 	// Holds the Blueprint Object made in the Editor
 	static ConstructorHelpers::FObjectFinder<UClass> LatticePlaneBlueprintObject(TEXT("Class'/Game/Blueprints/LatticePlane.LatticePlane_C'"));
-	
+
 	// if the Blueprint Object is not nullptr, Instantiate it, otherwise Print an Error Message
 	LatticePlaneBlueprintObject.Object ?
 		m_PlanePrefab = (UClass*)LatticePlaneBlueprintObject.Object :
@@ -57,7 +57,7 @@ void UReciprocalLatticeComponent::BeginPlay()
 		CreateReciprocalCubicLattice(m_NumberOfSpheresPerReciprocalVector, m_B1ReciprocalLatticeVector, m_B2ReciprocalLatticeVector, m_B3ReciprocalLatticeVector, m_ReciprocalSphereSize);
 	}
 	// ...
-	
+
 }
 
 
@@ -128,6 +128,11 @@ void UReciprocalLatticeComponent::CreateReciprocalCubicLattice(int& numberOfSphe
 	float spaceBetweenSpheresX = G.X / (numberOfSpheres - 1);
 	float spaceBetweenSpheresY = G.Y / (numberOfSpheres - 1);
 	float spaceBetweenSpheresZ = G.Z / (numberOfSpheres - 1);
+
+	float lengthX = G.X / (float)CONVERSION_FACTOR;
+	float lengthY = G.Y / (float)CONVERSION_FACTOR;
+	float lengthZ = G.Z / (float)CONVERSION_FACTOR;
+
 	m_DistanceBetweenReciprocalNodesZ = spaceBetweenSpheresZ;
 	m_NumberOfReciprocalNodesZ = numberOfSpheres;
 
@@ -140,6 +145,11 @@ void UReciprocalLatticeComponent::CreateReciprocalCubicLattice(int& numberOfSphe
 				AActor* Sphere = GetWorld()->SpawnActor<AActor>(m_ReciprocalSpherePrefab);
 				Sphere->SetActorLocation(FVector(m_ReciprocalWorldLocation.X + (k * spaceBetweenSpheresX), m_ReciprocalWorldLocation.Y + (j * spaceBetweenSpheresY), m_ReciprocalWorldLocation.Z + (i * spaceBetweenSpheresZ)));
 				Sphere->SetActorScale3D(FVector(sphereSize, sphereSize, sphereSize));
+
+				if (k == numberOfSpheres - 1)
+				{
+					CreatePlane(FVector(m_ReciprocalWorldLocation.X + (G.X / 2.0f), m_ReciprocalWorldLocation.Y + (G.Y / 2.0f), m_ReciprocalWorldLocation.Z + (i * spaceBetweenSpheresZ + sphereSize * CONVERSION_FACTOR * 0.5f)), lengthX, lengthY);
+				}
 			}
 		}
 	}
